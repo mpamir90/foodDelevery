@@ -1,5 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 
+import 'firestore_service.dart';
+
 class AuthService {
   FirebaseAuth auth = FirebaseAuth.instance;
   User? get user => auth.currentUser;
@@ -14,6 +16,7 @@ class AuthService {
             verificationId: verificationId, smsCode: smsCode))
         .then((value) async {
       await value.user!.updateDisplayName(name);
+      await FirestoreService().createUser(name, user!.phoneNumber.toString(),value.user!.uid);
     });
   }
 

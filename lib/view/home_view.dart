@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:relative_scale/relative_scale.dart';
 
+import '../bloc/auth_bloc.dart';
+import '../bloc/homeview_bloc.dart';
+import '../services/auth_service.dart';
 import 'detail_product._view.dart';
+import 'toko_view.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({Key? key}) : super(key: key);
@@ -11,259 +17,264 @@ class HomeView extends StatefulWidget {
   _HomeViewState createState() => _HomeViewState();
 }
 
-class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
+class _HomeViewState extends State<HomeView> {
   @override
   Widget build(BuildContext context) {
-    int selectedBarItem = 0;
-    TabController tabController = TabController(length: 3, vsync: this);
     return Scaffold(
       resizeToAvoidBottomInset: true,
       backgroundColor: Colors.grey[200],
-      bottomNavigationBar: ClipRRect(
-        borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(30), topRight: Radius.circular(30)),
-        child: StatefulBuilder(
-          builder: (context, setStateNavigation) => BottomNavigationBar(
-              currentIndex: selectedBarItem,
-              type: BottomNavigationBarType.fixed,
-              showUnselectedLabels: false,
-              selectedItemColor: Colors.red[400],
-              onTap: (value) {
-                print("Tab Index: " + value.toString());
-                selectedBarItem = value;
-                tabController.index = value;
-                setStateNavigation(() {});
-              },
-              items: [
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.home_outlined),
-                  label: "Home",
-                ),
-                BottomNavigationBarItem(
-                    icon: Icon(Icons.shopping_bag_outlined),
-                    label: "Keranjang"),
-                BottomNavigationBarItem(
-                    icon: Icon(Icons.account_circle_outlined),
-                    label: "Account"),
-              ]),
-        ),
-      ),
-      body: TabBarView(
-          controller: tabController,
-          children: [buildHome(), buildHome(), buildHome()]),
-    );
-  }
-
-  RelativeBuilder buildHome() {
-    return RelativeBuilder(
-      builder: (context, height, width, sy, sx) => ListView(
-        children: [
-          Container(
-            padding: EdgeInsets.all(20),
-            width: double.infinity,
-            decoration: BoxDecoration(
-              borderRadius:
-                  BorderRadius.only(bottomRight: Radius.circular(120)),
-              color: Colors.deepOrange,
-            ),
-            child: SafeArea(
-                child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "Hallo, Hack Shaw",
-                  style: Theme.of(context).textTheme.headline4,
-                ),
-                Text(
-                  "Sabtu, 8 July",
-                  style: Theme.of(context).textTheme.headline5,
-                ),
-                SizedBox(
-                  height: 20,
-                ),
-                ListTile(
-                  title: Row(
-                    children: [
-                      Icon(
-                        Icons.account_balance_wallet_outlined,
-                        size: 30,
-                        color: Colors.white,
-                      ),
-                      Text(
-                        " Rp 12500",
-                        style: Theme.of(context).textTheme.headline6,
-                      ),
-                    ],
+      body: RelativeBuilder(
+        builder: (context, height, width, sy, sx) => ListView(
+          children: [
+            Container(
+              padding: EdgeInsets.all(20),
+              width: double.infinity,
+              decoration: BoxDecoration(
+                borderRadius:
+                    BorderRadius.only(bottomRight: Radius.circular(120)),
+                color: Colors.deepOrange,
+              ),
+              child: SafeArea(
+                  child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Hallo, " + AuthService().user!.displayName.toString(),
+                    style: Theme.of(context).textTheme.headline4,
                   ),
-                ),
-                buildItemMenu(context, "Isi Saldo", Icons.add_circle_outline,
-                    () {
-                  showMaterialModalBottomSheet(
-                      enableDrag: true,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.only(
-                              topLeft: Radius.circular(20),
-                              topRight: Radius.circular(20))),
-                      context: context,
-                      builder: (context) => Container(
-                            // height: sy(100),
+                  Text(
+                    DateFormat("EEEE, d MMMM").format(DateTime.now()),
+                    style: Theme.of(context).textTheme.headline5,
+                  ),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  ListTile(
+                    title: Row(
+                      children: [
+                        Icon(
+                          Icons.account_balance_wallet_outlined,
+                          size: 30,
+                          color: Colors.white,
+                        ),
+                        Text(
+                          " Rp 12500",
+                          style: Theme.of(context).textTheme.headline6,
+                        ),
+                      ],
+                    ),
+                  ),
+                  Row(
+                    children: [
+                      buildItemMenu(
+                          context, "Isi Saldo", Icons.add_circle_outline, () {
+                        showMaterialModalBottomSheet(
+                            enableDrag: true,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.only(
+                                    topLeft: Radius.circular(20),
+                                    topRight: Radius.circular(20))),
+                            context: context,
+                            builder: (context) => Container(
+                                  // height: sy(100),
 
-                            child: SingleChildScrollView(
-                              padding: EdgeInsets.all(10),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    "Top Up",
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .headline5!
-                                        .copyWith(
-                                            color: Colors.orangeAccent[700]),
-                                  ),
-                                  SizedBox(
-                                    height: 10,
-                                  ),
-                                  Padding(
-                                    padding: EdgeInsets.only(
-                                        bottom: MediaQuery.of(context)
-                                            .viewInsets
-                                            .bottom),
-                                    child: TextFormField(
-                                      keyboardType: TextInputType.number,
-                                      style: Theme.of(context)
-                                                  .textTheme
-                                                  .headline6!
-                                                  .copyWith(
-                                                      color: Colors.black),
-                                      decoration: InputDecoration(
-                                          hintText: "Masukan Nominal",
-                                          focusedBorder: OutlineInputBorder(
-                                              borderSide: BorderSide(
-                                                  color: Colors.grey),
-                                              borderRadius:
-                                                  BorderRadius.circular(20)),
-                                          prefixIcon: Padding(
-                                            padding: const EdgeInsets.all(8.0),
-                                            child: Text(
-                                              "Rp.",
-                                              style: Theme.of(context)
-                                                  .textTheme
-                                                  .headline6!
-                                                  .copyWith(
-                                                      color: Colors.black),
-                                            ),
+                                  child: SingleChildScrollView(
+                                    padding: EdgeInsets.all(10),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          "Top Up",
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .headline5!
+                                              .copyWith(
+                                                  color:
+                                                      Colors.orangeAccent[700]),
+                                        ),
+                                        SizedBox(
+                                          height: 10,
+                                        ),
+                                        Padding(
+                                          padding: EdgeInsets.only(
+                                              bottom: MediaQuery.of(context)
+                                                  .viewInsets
+                                                  .bottom),
+                                          child: TextFormField(
+                                            keyboardType: TextInputType.number,
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .headline6!
+                                                .copyWith(color: Colors.black),
+                                            decoration: InputDecoration(
+                                                hintText: "Masukan Nominal",
+                                                focusedBorder:
+                                                    OutlineInputBorder(
+                                                        borderSide: BorderSide(
+                                                            color: Colors.grey),
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(20)),
+                                                prefixIcon: Padding(
+                                                  padding:
+                                                      const EdgeInsets.all(8.0),
+                                                  child: Text(
+                                                    "Rp.",
+                                                    style: Theme.of(context)
+                                                        .textTheme
+                                                        .headline6!
+                                                        .copyWith(
+                                                            color:
+                                                                Colors.black),
+                                                  ),
+                                                ),
+                                                prefixIconConstraints:
+                                                    BoxConstraints(
+                                                        minHeight: 0,
+                                                        minWidth: 0),
+                                                border: OutlineInputBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            20))),
                                           ),
-                                          prefixIconConstraints: BoxConstraints(
-                                              minHeight: 0, minWidth: 0),
-                                          border: OutlineInputBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(20))),
+                                        ),
+                                        SizedBox(
+                                          height: 10,
+                                        ),
+                                        SizedBox(
+                                            width: double.infinity,
+                                            child: ElevatedButton(
+                                              onPressed: () {},
+                                              child: Text("Top Up"),
+                                              style: ElevatedButton.styleFrom(
+                                                  primary:
+                                                      Colors.deepOrange[400]),
+                                            ))
+                                      ],
                                     ),
                                   ),
-                                  SizedBox(
-                                    height: 10,
-                                  ),
-                                  SizedBox(
-                                      width: double.infinity,
-                                      child: ElevatedButton(
-                                        onPressed: () {},
-                                        child: Text("Top Up"),
-                                        style: ElevatedButton.styleFrom(
-                                            primary: Colors.deepOrange[400]),
-                                      ))
-                                ],
-                              ),
-                            ),
-                          ));
-                }),
-              ],
-            )),
-          ),
-          Container(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(10),
-                  child: Text(
-                    "Kategori",
-                    style: Theme.of(context)
-                        .textTheme
-                        .headline4!
-                        .copyWith(color: Colors.grey),
-                  ),
-                ),
-                SizedBox(
-                  height: 10,
-                ),
-                SingleChildScrollView(
-                  padding: EdgeInsets.symmetric(horizontal: 10),
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: [
-                      buildItemKategori(sy, sx, context, "Makanan"),
-                      buildItemKategori(sy, sx, context, "Minuman"),
-                      buildItemKategori(sy, sx, context, "Fast Food"),
-                      buildItemKategori(sy, sx, context, "Camilan"),
+                                ));
+                      }),
+                      BlocConsumer<HomeviewBloc, HomeviewState>(
+                        listener: (context, state) {
+                          if (state is OnGetTokoSucceded) {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => TokoView(state.data)));
+                          }
+                        },
+                        builder:(context,state)=>
+                            buildItemMenu(context, (state is OnGetTokoLoading) ? "..." : "Toko Saya", Icons.shop, () {
+                          // Navigator.push(
+                          //     context,
+                          //     MaterialPageRoute(
+                          //         builder: (context) => TokoView()));
+                          if(state is! OnLogoutLoading){
+                            context.read<HomeviewBloc>().add(GetToko(AuthService().user!.uid));
+                          }
+                        }),
+                      )
                     ],
                   ),
-                ),
-                SizedBox(
-                  height: 20,
-                ),
-                Wrap(
-                  children: [
-                    GestureDetector(onTap: (){Navigator.push(context, MaterialPageRoute(builder: (context)=>DetailProductView()));},child: buildItemProduct(sy, sx, context)),
-                    buildItemProduct(sy, sx, context),
-                    buildItemProduct(sy, sx, context),
-                    buildItemProduct(sy, sx, context),
-                    buildItemProduct(sy, sx, context),
-                    buildItemProduct(sy, sx, context),
-                    buildItemProduct(sy, sx, context),
-                    buildItemProduct(sy, sx, context),
-                    buildItemProduct(sy, sx, context),
-                    buildItemProduct(sy, sx, context),
-                    buildItemProduct(sy, sx, context),
-                  ],
-                )
-              ],
+                ],
+              )),
             ),
-          ),
-        ],
+            Container(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(10),
+                    child: Text(
+                      "Kategori",
+                      style: Theme.of(context)
+                          .textTheme
+                          .headline4!
+                          .copyWith(color: Colors.grey),
+                    ),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  SingleChildScrollView(
+                    padding: EdgeInsets.symmetric(horizontal: 10),
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        buildItemKategori(sy, sx, context, "Makanan"),
+                        buildItemKategori(sy, sx, context, "Minuman"),
+                        buildItemKategori(sy, sx, context, "Fast Food"),
+                        buildItemKategori(sy, sx, context, "Camilan"),
+                      ],
+                    ),
+                  ),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  Wrap(
+                    children: [
+                      GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => DetailProductView()));
+                          },
+                          child: buildItemProduct(sy, sx, context)),
+                      buildItemProduct(sy, sx, context),
+                      buildItemProduct(sy, sx, context),
+                      buildItemProduct(sy, sx, context),
+                      buildItemProduct(sy, sx, context),
+                      buildItemProduct(sy, sx, context),
+                      buildItemProduct(sy, sx, context),
+                      buildItemProduct(sy, sx, context),
+                      buildItemProduct(sy, sx, context),
+                      buildItemProduct(sy, sx, context),
+                      buildItemProduct(sy, sx, context),
+                    ],
+                  )
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  ElevatedButton buildItemMenu(
+  Widget buildItemMenu(
       BuildContext context, String title, IconData icon, void navigation()) {
-    return ElevatedButton(
-      onPressed: () {
-        navigation();
-      },
-      style: ElevatedButton.styleFrom(
-          padding: EdgeInsets.all(8),
-          primary: Colors.deepOrange[100],
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            icon,
-            size: 30,
-            color: Colors.deepOrange[700],
-          ),
-          Text(
-            title,
-            style: Theme.of(context)
-                .textTheme
-                .bodyText1!
-                .copyWith(fontWeight: FontWeight.bold),
-          )
-        ],
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: ElevatedButton(
+        onPressed: () {
+          navigation();
+        },
+        style: ElevatedButton.styleFrom(
+            padding: EdgeInsets.all(8),
+            primary: Colors.deepOrange[100],
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10))),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 30,
+              color: Colors.deepOrange[700],
+            ),
+            Text(
+              title,
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyText1!
+                  .copyWith(fontWeight: FontWeight.bold),
+            )
+          ],
+        ),
       ),
     );
   }

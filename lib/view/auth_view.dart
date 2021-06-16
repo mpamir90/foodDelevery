@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../services/firestore_service.dart';
 import '../bloc/auth_bloc.dart';
 import '../services/auth_service.dart';
 
@@ -43,7 +44,7 @@ class _AuthViewState extends State<AuthView> {
                           children: [
                             Text(
                               "Login",
-                              style: Theme.of(context).textTheme.headline3,
+                              style: Theme.of(context).textTheme.headline3!.copyWith(color: Colors.deepOrange[400]),
                             ),
                             SizedBox(
                               height: 30,
@@ -70,7 +71,8 @@ class _AuthViewState extends State<AuthView> {
                                 builder: (context, state) {
                                   return ElevatedButton(
                                     onPressed: () async {
-                                      await AuthService()
+                                      if(await FirestoreService().cekUserByNumber(cPhone.text)){
+                                        await AuthService()
                                           .auth
                                           .verifyPhoneNumber(
                                             phoneNumber:
@@ -93,13 +95,11 @@ class _AuthViewState extends State<AuthView> {
                                           );
                                       viewState = ViewState.otpLogin;
                                       setState2(() {});
+                                      }
                                     },
-                                    child: (state is OnOtpLoginLoading)
-                                        ? CircularProgressIndicator(
-                                            color: Colors.white,
-                                          )
-                                        : Text("Masuk"),
+                                    child: Text("Masuk"),
                                     style: ElevatedButton.styleFrom(
+                                      primary: Colors.deepOrange[400],
                                         elevation: 0,
                                         shape: RoundedRectangleBorder(
                                             borderRadius:
@@ -142,7 +142,7 @@ class _AuthViewState extends State<AuthView> {
                           children: [
                             Text(
                               "Daftar",
-                              style: Theme.of(context).textTheme.headline3,
+                              style: Theme.of(context).textTheme.headline3!.copyWith(color: Colors.deepOrange[400]),
                             ),
                             SizedBox(
                               height: 30,
@@ -158,7 +158,8 @@ class _AuthViewState extends State<AuthView> {
                               child: ElevatedButton(
                                 onPressed: () async {
                                   try {
-                                    await AuthService().auth.verifyPhoneNumber(
+                                    if(!(await FirestoreService().cekUserByNumber(cPhone.text))){
+                                      await AuthService().auth.verifyPhoneNumber(
                                           phoneNumber:
                                               "+62" + cPhone.text.trim(),
                                           codeAutoRetrievalTimeout:
@@ -177,14 +178,19 @@ class _AuthViewState extends State<AuthView> {
                                           },
                                           timeout: Duration(minutes: 2),
                                         );
+                                        viewState = ViewState.otp;
+                                  setState2(() {});
+                                    }else{
+                                      showDialog(context: context, builder: (context)=>AlertDialog(title: Text("Pengguna Sudah Ada",style: Theme.of(context).textTheme.headline4!.copyWith(color: Colors.black),),));
+                                    }
                                   } catch (e) {
                                     print(e.toString());
                                   }
-                                  viewState = ViewState.otp;
-                                  setState2(() {});
+                                  
                                 },
                                 child: Text("Daftar"),
                                 style: ElevatedButton.styleFrom(
+                                  primary: Colors.deepOrange[400],
                                     elevation: 0,
                                     shape: RoundedRectangleBorder(
                                         borderRadius:
@@ -292,6 +298,7 @@ class _AuthViewState extends State<AuthView> {
                         ),
                       );
                     case ViewState.otpLogin:
+                    cPhone = TextEditingController ();
                       return AnimatedContainer(
                         duration: Duration(seconds: 1),
                         padding: EdgeInsets.fromLTRB(30, 10, 30, 10),
@@ -299,7 +306,7 @@ class _AuthViewState extends State<AuthView> {
                           children: [
                             Text(
                               "Masukan Kode OTP",
-                              style: Theme.of(context).textTheme.headline3,
+                              style: Theme.of(context).textTheme.headline3!.copyWith(color: Colors.deepOrange[400]),
                             ),
                             SizedBox(
                               height: 30,
@@ -330,6 +337,7 @@ class _AuthViewState extends State<AuthView> {
                                         )
                                       : Text("Verifikasi Nomor Handphone"),
                                   style: ElevatedButton.styleFrom(
+                                    primary: Colors.deepOrange[400],
                                       elevation: 0,
                                       shape: RoundedRectangleBorder(
                                           borderRadius:
@@ -414,7 +422,7 @@ class _AuthViewState extends State<AuthView> {
 Widget headerLogin() {
   return Container(
     decoration: BoxDecoration(
-        color: Colors.lightBlue[200],
+        color: Colors.deepOrange,
         borderRadius: BorderRadius.only(bottomLeft: Radius.circular(150))),
     child: Center(
         child: Icon(
